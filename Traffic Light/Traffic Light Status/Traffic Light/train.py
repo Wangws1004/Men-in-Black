@@ -10,5 +10,6 @@ random.seed(777)
 model = NIA_SEGNet_module()
 # trainer = pl.Trainer(gpus=1)
 
-trainer = pl.Trainer(gpus=[0], distributed_backend="ddp", callbacks=[EarlyStopping(monitor='val_loss',patience=10)])
+trainer = pl.Trainer(accelerator="gpu", callbacks=[EarlyStopping(monitor='val_loss', patience=10)])
+# trainer = pl.Trainer(gpus=1, distributed_backend="ddp", callbacks=[EarlyStopping(monitor='val_loss',patience=10)])
 trainer.fit(model)
