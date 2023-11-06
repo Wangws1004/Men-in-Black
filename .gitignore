@@ -192,6 +192,7 @@ fabric.properties
 *.pth
 */License-Plate-Recognition-4/*
 */datasets/*
+*/.idea/
 __pycache__
 
 *.ckpt
