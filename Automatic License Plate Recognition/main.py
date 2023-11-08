@@ -12,12 +12,26 @@ mot_tracker = Sort()
 
 # load models
 coco_model = YOLO('yolov8n.pt')
-license_plate_detector = YOLO('./models/license_plate_detector.pt')
+license_plate_detector = YOLO('yolov8m.pt')
+license_plate_detector = YOLO('models/11-08_best_weight_yolov8m_50_epoch.pt')
 
 # load video
 cap = cv2.VideoCapture('./sample.mp4')
 
-vehicles = [2, 3, 5, 7]
+person = [0]
+vehicles = [1, 2, 3, 5, 7]
+traffic_signs = [9, 11]
+
+class_id_dict = {
+    0: 'person',
+    1: 'bicycle',
+    2: 'car',
+    3: 'motorbike',
+    5: 'bus',
+    7: 'truck',
+    9: 'traffic light',
+    11: 'stop sign'
+}
 
 # read frames
 frame_nmr = -1
@@ -59,11 +73,17 @@ while ret:
                 license_plate_text, license_plate_text_score = read_license_plate(license_plate_crop_thresh)
 
                 if license_plate_text is not None:
-                    results[frame_nmr][car_id] = {'car': {'bbox': [xcar1, ycar1, xcar2, ycar2]},
-                                                  'license_plate': {'bbox': [x1, y1, x2, y2],
-                                                                    'text': license_plate_text,
-                                                                    'bbox_score': score,
-                                                                    'text_score': license_plate_text_score}}
+                    results[frame_nmr][car_id] = {
+                        'car': {
+                            'bbox': [xcar1, ycar1, xcar2, ycar2],
+                            # 'class': class_id_dict[class_id]
+                                },
+                        'license_plate': {
+                            'bbox': [x1, y1, x2, y2],
+                            'text': license_plate_text,
+                            'bbox_score': score,
+                            'text_score': license_plate_text_score}
+                    }
 
 # write results
 write_csv(results, './test.csv')

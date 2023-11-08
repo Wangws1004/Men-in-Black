@@ -193,8 +193,10 @@ fabric.properties
 */License-Plate-Recognition-4/*
 */datasets/*
 */.idea/
+*.mp4
 __pycache__
 
 *.ckpt
 *.tar
 *.zip
+
