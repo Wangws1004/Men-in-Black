@@ -34,56 +34,56 @@ class_id_dict = {
 }
 
 # read frames
-frame_nmr = -1
+frame_number = -1
 ret = True
 while ret:
-    frame_nmr += 1
+    frame_number += 1
     ret, frame = cap.read()
     if ret:
-        results[frame_nmr] = {}
+        results[frame_number] = {}
         # detect vehicles
-        detections = coco_model(frame)[0]
-        detections_ = []
+        detections = coco_model.track(frame, persist=True)[0]
         for detection in detections.boxes.data.tolist():
-            x1, y1, x2, y2, score, class_id = detection
+            x1, y1, x2, y2, track_id, score, class_id = detection
             if int(class_id) in vehicles:
-                detections_.append([x1, y1, x2, y2, score])
+                vehicle_bounding_boxes = [[x1, y1, x2, y2, track_id, score]]
 
-        # track vehicles
-        track_ids = mot_tracker.update(np.asarray(detections_))
+                for bbox in vehicle_bounding_boxes:
+                    roi = frame[int(y1):int(y2), int(x1):int(x2)]
 
-        # detect license plates
-        license_plates = license_plate_detector(frame)[0]
-        for license_plate in license_plates.boxes.data.tolist():
-            x1, y1, x2, y2, score, class_id = license_plate
+                    # detect license plates
+                    license_plates = license_plate_detector(roi)[0]
 
-            # assign license plate to car
-            xcar1, ycar1, xcar2, ycar2, car_id = get_car(license_plate, track_ids)
+                    # process license plate
+                    for license_plate in license_plates.boxes.data.tolist():
+                        plate_x1, plate_y1, plate_x2, plate_y2, plate_score, _ = license_plate
 
-            if car_id != -1:
+                        # crop license plate
+                        license_plate_crop = roi[int(plate_y1):int(plate_y2), int(plate_x1):int(plate_x2)]
 
-                # crop license plate
-                license_plate_crop = frame[int(y1):int(y2), int(x1): int(x2), :]
+                        # de-colorize
+                        license_plate_crop_gray = cv2.cvtColor(license_plate_crop, cv2.COLOR_BGR2GRAY)
 
-                # process license plate
-                license_plate_crop_gray = cv2.cvtColor(license_plate_crop, cv2.COLOR_BGR2GRAY)
-                _, license_plate_crop_thresh = cv2.threshold(license_plate_crop_gray, 64, 255, cv2.THRESH_BINARY_INV)
+                        # posterize
+                        _, plate_threshold = cv2.threshold(license_plate_crop_gray, 64, 255, cv2.THRESH_BINARY_INV)
 
-                # read license plate number
-                license_plate_text, license_plate_text_score = read_license_plate(license_plate_crop_thresh)
+                        # OCR read license plate number
+                        license_plate_text, license_plate_text_score = read_license_plate(plate_threshold)
 
-                if license_plate_text is not None:
-                    results[frame_nmr][car_id] = {
-                        'car': {
-                            'bbox': [xcar1, ycar1, xcar2, ycar2],
-                            # 'class': class_id_dict[class_id]
+                        # if plate could be read write results
+                        if license_plate_text is not None:
+                            results[frame_number][track_id] = {
+                                'car': {
+                                    'bbox': [x1, y1, x2, y2],
+                                    'bbox_score': score
                                 },
-                        'license_plate': {
-                            'bbox': [x1, y1, x2, y2],
-                            'text': license_plate_text,
-                            'bbox_score': score,
-                            'text_score': license_plate_text_score}
-                    }
+                                'license_plate': {
+                                    'bbox': [plate_x1, plate_y1, plate_x2, plate_y2],
+                                    'number': license_plate_text,
+                                    'bbox_score': plate_score,
+                                    'text_score': license_plate_text_score
+                                }
+                            }
 
 # write results
-write_csv(results, './test.csv')
+write_csv(results, './results.csv')

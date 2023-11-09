@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 
 
-def draw_border(img, top_left, bottom_right, color=(0, 255, 0), thickness=10, line_length_x=200, line_length_y=200):
+def draw_border(img, top_left, bottom_right, color=(0, 255, 0), thickness=6, line_length_x=200, line_length_y=200):
     x1, y1 = top_left
     x2, y2 = bottom_right
 
@@ -43,7 +43,7 @@ for car_id in np.unique(results['car_id']):
                              'license_plate_number': results[(results['car_id'] == car_id) &
                                                              (results['license_number_score'] == max_)]['license_number'].iloc[0]}
     cap.set(cv2.CAP_PROP_POS_FRAMES, results[(results['car_id'] == car_id) &
-                                             (results['license_number_score'] == max_)]['frame_nmr'].iloc[0])
+                                             (results['license_number_score'] == max_)]['frame_number'].iloc[0])
     ret, frame = cap.read()
 
     x1, y1, x2, y2 = ast.literal_eval(results[(results['car_id'] == car_id) &
@@ -55,7 +55,7 @@ for car_id in np.unique(results['car_id']):
     license_plate[car_id]['license_crop'] = license_crop
 
 
-frame_nmr = -1
+frame_number = -1
 
 cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
 
@@ -63,9 +63,9 @@ cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
 ret = True
 while ret:
     ret, frame = cap.read()
-    frame_nmr += 1
+    frame_number += 1
     if ret:
-        df_ = results[results['frame_nmr'] == frame_nmr]
+        df_ = results[results['frame_number'] == frame_number]
         for row_indx in range(len(df_)):
             # draw car
             car_x1, car_y1, car_x2, car_y2 = ast.literal_eval(df_.iloc[row_indx]['car_bbox'].replace('[ ', '[').replace('   ', ' ').replace('  ', ' ').replace(' ', ','))
