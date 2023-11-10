@@ -11,9 +11,9 @@ results = {}
 mot_tracker = Sort()
 
 # load models
-coco_model = YOLO('yolov8n.pt')
+coco_model = YOLO('yolov8m.pt')
 license_plate_detector = YOLO('yolov8m.pt')
-license_plate_detector = YOLO('models/11-08_best_weight_yolov8m_50_epoch.pt')
+license_plate_detector = YOLO('models/11-10_best_weight_yolov8m_140_epochs.pt')
 
 # load video
 cap = cv2.VideoCapture('./sample.mp4')
@@ -79,5 +79,5 @@ while ret:
                                                                     'bbox_score': score,
                                                                     'text_score': license_plate_text_score}}
 
-# write results
-write_csv(results, './test.csv')
+    # write results
+    write_csv(results, './test.csv')

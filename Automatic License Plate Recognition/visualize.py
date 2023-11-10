@@ -34,7 +34,7 @@ fourcc = cv2.VideoWriter_fourcc(*'mp4v')  # Specify the codec
 fps = cap.get(cv2.CAP_PROP_FPS)
 width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
 height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-out = cv2.VideoWriter('./out.mp4', fourcc, fps, (width, height))
+out = cv2.VideoWriter('sample_out.mp4', fourcc, fps, (width, height))
 
 license_plate = {}
 for car_id in np.unique(results['car_id']):
@@ -50,7 +50,7 @@ for car_id in np.unique(results['car_id']):
                                               (results['license_number_score'] == max_)]['license_plate_bbox'].iloc[0].replace('[ ', '[').replace('   ', ' ').replace('  ', ' ').replace(' ', ','))
 
     license_crop = frame[int(y1):int(y2), int(x1):int(x2), :]
-    license_crop = cv2.resize(license_crop, (int((x2 - x1) * 400 / (y2 - y1)), 400))
+    license_crop = cv2.resize(license_crop, (int((x2 - x1) * 200 / (y2 - y1)), 200)) # original value: 400
 
     license_plate[car_id]['license_crop'] = license_crop
 
@@ -91,16 +91,16 @@ while ret:
                 (text_width, text_height), _ = cv2.getTextSize(
                     license_plate[df_.iloc[row_indx]['car_id']]['license_plate_number'],
                     cv2.FONT_HERSHEY_SIMPLEX,
-                    4.3,
-                    17)
+                    2, # original values:4.3
+                    8) # original values: 7
 
                 cv2.putText(frame,
                             license_plate[df_.iloc[row_indx]['car_id']]['license_plate_number'],
                             (int((car_x2 + car_x1 - text_width) / 2), int(car_y1 - H - 250 + (text_height / 2))),
                             cv2.FONT_HERSHEY_SIMPLEX,
-                            4.3,
+                            2, # original value: 4.3
                             (0, 0, 0),
-                            17)
+                            8) # oroginal value:17
 
             except:
                 pass
