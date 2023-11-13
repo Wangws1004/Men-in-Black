@@ -1,8 +1,12 @@
 import string
 import easyocr
+import cv2
+
+import numpy as np
+from scipy.interpolate import interp1d
 
 # Initialize the OCR reader
-reader = easyocr.Reader(['en'], gpu=True)
+reader = easyocr.Reader(['en'], gpu=False)
 
 # Mapping dictionaries for character conversion
 dict_char_to_int = {'O': '0',
@@ -155,3 +159,137 @@ def get_car(license_plate, vehicle_track_ids):
         return vehicle_track_ids[car_indx]
 
     return -1, -1, -1, -1, -1
+
+
+def interpolate_bounding_boxes(data):
+    # Extract necessary data columns from input data
+    frame_numbers = np.array([int(row['frame_nmr']) for row in data])
+    car_ids = np.array([int(float(row['car_id'])) for row in data])
+    car_bboxes = np.array([list(map(float, row['car_bbox'][1:-1].split())) for row in data])
+    license_plate_bboxes = np.array([list(map(float, row['license_plate_bbox'][1:-1].split())) for row in data])
+
+    interpolated_data = []
+    unique_car_ids = np.unique(car_ids)
+    for car_id in unique_car_ids:
+
+        frame_numbers_ = [p['frame_nmr'] for p in data if int(float(p['car_id'])) == int(float(car_id))]
+        print(frame_numbers_, car_id)
+
+        # Filter data for a specific car ID
+        car_mask = car_ids == car_id
+        car_frame_numbers = frame_numbers[car_mask]
+        car_bboxes_interpolated = []
+        license_plate_bboxes_interpolated = []
+
+        first_frame_number = car_frame_numbers[0]
+        last_frame_number = car_frame_numbers[-1]
+
+        for i in range(len(car_bboxes[car_mask])):
+            frame_number = car_frame_numbers[i]
+            car_bbox = car_bboxes[car_mask][i]
+            license_plate_bbox = license_plate_bboxes[car_mask][i]
+
+            if i > 0:
+                prev_frame_number = car_frame_numbers[i-1]
+                prev_car_bbox = car_bboxes_interpolated[-1]
+                prev_license_plate_bbox = license_plate_bboxes_interpolated[-1]
+
+                if frame_number - prev_frame_number > 1:
+                    # Interpolate missing frames' bounding boxes
+                    frames_gap = frame_number - prev_frame_number
+                    x = np.array([prev_frame_number, frame_number])
+                    x_new = np.linspace(prev_frame_number, frame_number, num=frames_gap, endpoint=False)
+                    interp_func = interp1d(x, np.vstack((prev_car_bbox, car_bbox)), axis=0, kind='linear')
+                    interpolated_car_bboxes = interp_func(x_new)
+                    interp_func = interp1d(x, np.vstack((prev_license_plate_bbox, license_plate_bbox)), axis=0, kind='linear')
+                    interpolated_license_plate_bboxes = interp_func(x_new)
+
+                    car_bboxes_interpolated.extend(interpolated_car_bboxes[1:])
+                    license_plate_bboxes_interpolated.extend(interpolated_license_plate_bboxes[1:])
+
+            car_bboxes_interpolated.append(car_bbox)
+            license_plate_bboxes_interpolated.append(license_plate_bbox)
+
+        for i in range(len(car_bboxes_interpolated)):
+            frame_number = first_frame_number + i
+            row = {}
+            row['frame_nmr'] = str(frame_number)
+            row['car_id'] = str(car_id)
+            row['car_bbox'] = ' '.join(map(str, car_bboxes_interpolated[i]))
+            row['license_plate_bbox'] = ' '.join(map(str, license_plate_bboxes_interpolated[i]))
+
+            if str(frame_number) not in frame_numbers_:
+                # Imputed row, set the following fields to '0'
+                row['license_plate_bbox_score'] = '0'
+                row['license_number'] = '0'
+                row['license_number_score'] = '0'
+            else:
+                # Original row, retrieve values from the input data if available
+                original_row = [p for p in data if int(p['frame_nmr']) == frame_number and int(float(p['car_id'])) == int(float(car_id))][0]
+                row['license_plate_bbox_score'] = original_row['license_plate_bbox_score'] if 'license_plate_bbox_score' in original_row else '0'
+                row['license_number'] = original_row['license_number'] if 'license_number' in original_row else '0'
+                row['license_number_score'] = original_row['license_number_score'] if 'license_number_score' in original_row else '0'
+
+            interpolated_data.append(row)
+
+    return interpolated_data
+
+
+def draw_border(img, top_left, bottom_right, color=(0, 255, 0), thickness=10, line_length_x=200, line_length_y=200):
+    x1, y1 = top_left
+    x2, y2 = bottom_right
+
+    cv2.line(img, (x1, y1), (x1, y1 + line_length_y), color, thickness)  #-- top-left
+    cv2.line(img, (x1, y1), (x1 + line_length_x, y1), color, thickness)
+
+    cv2.line(img, (x1, y2), (x1, y2 - line_length_y), color, thickness)  #-- bottom-left
+    cv2.line(img, (x1, y2), (x1 + line_length_x, y2), color, thickness)
+
+    cv2.line(img, (x2, y1), (x2 - line_length_x, y1), color, thickness)  #-- top-right
+    cv2.line(img, (x2, y1), (x2, y1 + line_length_y), color, thickness)
+
+    cv2.line(img, (x2, y2), (x2, y2 - line_length_y), color, thickness)  #-- bottom-right
+    cv2.line(img, (x2, y2), (x2 - line_length_x, y2), color, thickness)
+
+    return img
+
+
+def process_and_visualize_license_plate(license_plate_crop):
+    """
+    Process the license plate in the frame and visualize the steps.
+
+    Args:
+    frame (numpy.ndarray): The original frame from the video.
+    bbox (tuple): The bounding box coordinates (x1, y1, x2, y2) for the license plate.
+    show_image_function (function): Function to display the images.
+    """
+
+    if license_plate_crop.size > 0:
+        # Convert to grayscale
+        license_plate_crop_gray = cv2.cvtColor(license_plate_crop, cv2.COLOR_BGR2GRAY)
+
+        # Optional: Histogram equalization (uncomment if needed)
+        # license_plate_crop_equ = cv2.equalizeHist(license_plate_crop_gray)
+
+        # Apply Gaussian blur
+        license_plate_crop_blur = cv2.GaussianBlur(license_plate_crop_gray, (5, 5), 0)
+
+        # Noise Reduction
+        license_plate_crop_bfilter = cv2.bilateralFilter(license_plate_crop_blur, 11, 17, 17)
+
+        # Apply Canny edge detection
+        license_plate_crop_canny = cv2.Canny(license_plate_crop_bfilter, 75, 200)
+
+        # Optional: Apply thresholding (uncomment if needed)
+        # _, license_plate_crop_thresh = cv2.threshold(license_plate_crop_blur, 64, 255, cv2.THRESH_BINARY_INV)
+
+        # Visualize the processed images
+        # show_image_function(frame)
+        # show_image_function(license_plate_crop)
+        # show_image_function(license_plate_crop_gray)
+        # # show_image_function(license_plate_crop_equ)
+        # show_image_function(license_plate_crop_blur)
+        # show_image_function(license_plate_crop_canny)
+        # # show_image_function(license_plate_crop_thresh)
+
+        return license_plate_crop_canny
