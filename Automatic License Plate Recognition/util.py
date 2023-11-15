@@ -1,12 +1,16 @@
 import string
 import easyocr
 import cv2
-
+import imutils
 import numpy as np
 from scipy.interpolate import interp1d
+import ast
+import re
+import pandas as pd
+import os
 
 # Initialize the OCR reader
-reader = easyocr.Reader(['en'], gpu=False)
+reader = easyocr.Reader(['ko'], gpu=False)
 
 # Mapping dictionaries for character conversion
 dict_char_to_int = {'O': '0',
@@ -22,6 +26,9 @@ dict_int_to_char = {'0': 'O',
                     '4': 'A',
                     '6': 'G',
                     '5': 'S'}
+hangul_characters = {'가', '나', '다', '라', '마', '거', '너', '더', '러', '머', '버', '서', '어', '저', '고', '노', '도', '로', '모', '보',
+                     '소', '오', '조', '구', '누', '두', '루', '무', '부', '수', '우', '주', '그', '느', '드', '르', '므', '브', '스', '으',
+                     '즈', '허', '하', '호'}
 
 
 def write_csv(results, output_path):
@@ -41,8 +48,8 @@ def write_csv(results, output_path):
             for car_id in results[frame_nmr].keys():
                 # print(results[frame_nmr][car_id])
                 if 'car' in results[frame_nmr][car_id].keys() and \
-                   'license_plate' in results[frame_nmr][car_id].keys() and \
-                   'text' in results[frame_nmr][car_id]['license_plate'].keys():
+                        'license_plate' in results[frame_nmr][car_id].keys() and \
+                        'text' in results[frame_nmr][car_id]['license_plate'].keys():
                     f.write('{},{},{},{},{},{},{}\n'.format(frame_nmr,
                                                             car_id,
                                                             '[{} {} {} {}]'.format(
@@ -64,7 +71,7 @@ def write_csv(results, output_path):
 
 def license_complies_format(text):
     """
-    Check if the license plate text complies with the required format.
+    Check if the license plate text complies with the required Korean format.
 
     Args:
         text (str): License plate text.
@@ -72,17 +79,32 @@ def license_complies_format(text):
     Returns:
         bool: True if the license plate complies with the format, False otherwise.
     """
-    if len(text) != 7:
-        return False
 
-    if (text[0] in string.ascii_uppercase or text[0] in dict_int_to_char.keys()) and \
-       (text[1] in string.ascii_uppercase or text[1] in dict_int_to_char.keys()) and \
-       (text[2] in ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'] or text[2] in dict_char_to_int.keys()) and \
-       (text[3] in ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'] or text[3] in dict_char_to_int.keys()) and \
-       (text[4] in string.ascii_uppercase or text[4] in dict_int_to_char.keys()) and \
-       (text[5] in string.ascii_uppercase or text[5] in dict_int_to_char.keys()) and \
-       (text[6] in string.ascii_uppercase or text[6] in dict_int_to_char.keys()):
+    # Check for format: Hangul-Hangul-Number-Number-Number-Number-Hangul
+    if len(text) == 7 and \
+            text[0] in hangul_characters and \
+            text[1] in hangul_characters and \
+            text[2:6].isdigit() and \
+            text[6] in hangul_characters:
         return True
+
+    # Check for format: Number-Number(-Number)-Hangul-Number-Number-Number-Number
+    elif len(text) in [7, 8] and \
+            text[:-5].isdigit() and \
+            text[-5] in hangul_characters and \
+            text[-4:].isdigit():
+        return True
+
+    elif len(text) == 7 and \
+            (text[0] in string.ascii_uppercase or text[0] in dict_int_to_char.keys()) and \
+            (text[1] in string.ascii_uppercase or text[1] in dict_int_to_char.keys()) and \
+            (text[2] in ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'] or text[2] in dict_char_to_int.keys()) and \
+            (text[3] in ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'] or text[3] in dict_char_to_int.keys()) and \
+            (text[4] in string.ascii_uppercase or text[4] in dict_int_to_char.keys()) and \
+            (text[5] in string.ascii_uppercase or text[5] in dict_int_to_char.keys()) and \
+            (text[6] in string.ascii_uppercase or text[6] in dict_int_to_char.keys()):
+        return True
+
     else:
         return False
 
@@ -109,6 +131,25 @@ def format_license(text):
     return license_plate_
 
 
+def clean_text(text):
+    """
+    Clean the text by removing special characters, keeping only letters, numbers, and Hangul.
+
+    Args:
+        text (str): Text detected by OCR.
+
+    Returns:
+        str: Cleaned text.
+    """
+    # Define a regex pattern that matches everything except letters, numbers, and Hangul
+    pattern = '[^A-Za-z0-9가-힣]'
+
+    # Remove special characters using regex sub
+    cleaned_text = re.sub(pattern, '', text)
+
+    return cleaned_text.upper()  # Convert to upper case and return
+
+# Usage in your read_license_plate function
 def read_license_plate(license_plate_crop):
     """
     Read the license plate text from the given cropped image.
@@ -125,10 +166,12 @@ def read_license_plate(license_plate_crop):
     for detection in detections:
         bbox, text, score = detection
 
-        text = text.upper().replace(' ', '')
-
-        if license_complies_format(text):
-            return format_license(text), score
+        # Clean the text
+        cleaned_text = clean_text(text)
+        print('text:', text)
+        print('cleaned text:', cleaned_text)
+        if license_complies_format(cleaned_text):
+            return cleaned_text, score
 
     return None, None
 
@@ -190,7 +233,7 @@ def interpolate_bounding_boxes(data):
             license_plate_bbox = license_plate_bboxes[car_mask][i]
 
             if i > 0:
-                prev_frame_number = car_frame_numbers[i-1]
+                prev_frame_number = car_frame_numbers[i - 1]
                 prev_car_bbox = car_bboxes_interpolated[-1]
                 prev_license_plate_bbox = license_plate_bboxes_interpolated[-1]
 
@@ -201,7 +244,8 @@ def interpolate_bounding_boxes(data):
                     x_new = np.linspace(prev_frame_number, frame_number, num=frames_gap, endpoint=False)
                     interp_func = interp1d(x, np.vstack((prev_car_bbox, car_bbox)), axis=0, kind='linear')
                     interpolated_car_bboxes = interp_func(x_new)
-                    interp_func = interp1d(x, np.vstack((prev_license_plate_bbox, license_plate_bbox)), axis=0, kind='linear')
+                    interp_func = interp1d(x, np.vstack((prev_license_plate_bbox, license_plate_bbox)), axis=0,
+                                           kind='linear')
                     interpolated_license_plate_bboxes = interp_func(x_new)
 
                     car_bboxes_interpolated.extend(interpolated_car_bboxes[1:])
@@ -225,10 +269,14 @@ def interpolate_bounding_boxes(data):
                 row['license_number_score'] = '0'
             else:
                 # Original row, retrieve values from the input data if available
-                original_row = [p for p in data if int(p['frame_nmr']) == frame_number and int(float(p['car_id'])) == int(float(car_id))][0]
-                row['license_plate_bbox_score'] = original_row['license_plate_bbox_score'] if 'license_plate_bbox_score' in original_row else '0'
+                original_row = [p for p in data if
+                                int(p['frame_nmr']) == frame_number and int(float(p['car_id'])) == int(float(car_id))][
+                    0]
+                row['license_plate_bbox_score'] = original_row[
+                    'license_plate_bbox_score'] if 'license_plate_bbox_score' in original_row else '0'
                 row['license_number'] = original_row['license_number'] if 'license_number' in original_row else '0'
-                row['license_number_score'] = original_row['license_number_score'] if 'license_number_score' in original_row else '0'
+                row['license_number_score'] = original_row[
+                    'license_number_score'] if 'license_number_score' in original_row else '0'
 
             interpolated_data.append(row)
 
@@ -239,57 +287,189 @@ def draw_border(img, top_left, bottom_right, color=(0, 255, 0), thickness=10, li
     x1, y1 = top_left
     x2, y2 = bottom_right
 
-    cv2.line(img, (x1, y1), (x1, y1 + line_length_y), color, thickness)  #-- top-left
+    cv2.line(img, (x1, y1), (x1, y1 + line_length_y), color, thickness)  # -- top-left
     cv2.line(img, (x1, y1), (x1 + line_length_x, y1), color, thickness)
 
-    cv2.line(img, (x1, y2), (x1, y2 - line_length_y), color, thickness)  #-- bottom-left
+    cv2.line(img, (x1, y2), (x1, y2 - line_length_y), color, thickness)  # -- bottom-left
     cv2.line(img, (x1, y2), (x1 + line_length_x, y2), color, thickness)
 
-    cv2.line(img, (x2, y1), (x2 - line_length_x, y1), color, thickness)  #-- top-right
+    cv2.line(img, (x2, y1), (x2 - line_length_x, y1), color, thickness)  # -- top-right
     cv2.line(img, (x2, y1), (x2, y1 + line_length_y), color, thickness)
 
-    cv2.line(img, (x2, y2), (x2, y2 - line_length_y), color, thickness)  #-- bottom-right
+    cv2.line(img, (x2, y2), (x2, y2 - line_length_y), color, thickness)  # -- bottom-right
     cv2.line(img, (x2, y2), (x2 - line_length_x, y2), color, thickness)
 
     return img
 
 
 def process_and_visualize_license_plate(license_plate_crop):
-    """
-    Process the license plate in the frame and visualize the steps.
-
-    Args:
-    frame (numpy.ndarray): The original frame from the video.
-    bbox (tuple): The bounding box coordinates (x1, y1, x2, y2) for the license plate.
-    show_image_function (function): Function to display the images.
-    """
-
     if license_plate_crop.size > 0:
         # Convert to grayscale
         license_plate_crop_gray = cv2.cvtColor(license_plate_crop, cv2.COLOR_BGR2GRAY)
 
-        # Optional: Histogram equalization (uncomment if needed)
-        # license_plate_crop_equ = cv2.equalizeHist(license_plate_crop_gray)
+        # Apply CLAHE for contrast enhancement
+        clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
+        license_plate_crop_clahe = clahe.apply(license_plate_crop_gray)
 
-        # Apply Gaussian blur
-        license_plate_crop_blur = cv2.GaussianBlur(license_plate_crop_gray, (5, 5), 0)
-
-        # Noise Reduction
-        license_plate_crop_bfilter = cv2.bilateralFilter(license_plate_crop_blur, 11, 17, 17)
+        # Apply Gaussian blur to reduce noise
+        license_plate_crop_blur = cv2.GaussianBlur(license_plate_crop_clahe, (5, 5), 0)
 
         # Apply Canny edge detection
-        license_plate_crop_canny = cv2.Canny(license_plate_crop_bfilter, 75, 200)
+        license_plate_crop_canny = cv2.Canny(license_plate_crop_blur, 75, 200)
 
-        # Optional: Apply thresholding (uncomment if needed)
-        # _, license_plate_crop_thresh = cv2.threshold(license_plate_crop_blur, 64, 255, cv2.THRESH_BINARY_INV)
+        # Find contours and identify the one that most likely represents the license plate
+        cnts = cv2.findContours(license_plate_crop_canny.copy(), cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+        cnts = imutils.grab_contours(cnts)
+        cnts = sorted(cnts, key=cv2.contourArea, reverse=True)[:5]  # Sort by area, get the largest
 
-        # Visualize the processed images
-        # show_image_function(frame)
-        # show_image_function(license_plate_crop)
-        # show_image_function(license_plate_crop_gray)
-        # # show_image_function(license_plate_crop_equ)
-        # show_image_function(license_plate_crop_blur)
-        # show_image_function(license_plate_crop_canny)
-        # # show_image_function(license_plate_crop_thresh)
+        screenCnt = None
+        for c in cnts:
+            # Approximate the contour
+            peri = cv2.arcLength(c, True)
+            approx = cv2.approxPolyDP(c, 0.018 * peri, True)
 
-        return license_plate_crop_canny
+            # The contour is likely to be the license plate if it's rectangular (has four points)
+            if len(approx) == 4:
+                screenCnt = approx
+                break
+
+        # Perspective transformation if a rectangular contour is found
+        if screenCnt is not None:
+            # Coordinates of the found contour
+            pts = screenCnt.reshape(4, 2)
+            rect = np.zeros((4, 2), dtype="float32")
+
+            # The top-left point has the smallest sum, whereas
+            # the bottom-right point has the largest sum
+            s = pts.sum(axis=1)
+            rect[0] = pts[np.argmin(s)]
+            rect[2] = pts[np.argmax(s)]
+
+            # Compute the difference between the points:
+            # the top-right point will have the minumum difference,
+            # the bottom-left will have the maximum difference
+            diff = np.diff(pts, axis=1)
+            rect[1] = pts[np.argmin(diff)]
+            rect[3] = pts[np.argmax(diff)]
+
+            # Transform perspective
+            (tl, tr, br, bl) = rect
+            widthA = np.linalg.norm(br - bl)
+            widthB = np.linalg.norm(tr - tl)
+            maxWidth = max(int(widthA), int(widthB))
+            heightA = np.linalg.norm(tr - br)
+            heightB = np.linalg.norm(tl - bl)
+            maxHeight = max(int(heightA), int(heightB))
+
+            dst = np.array([
+                [0, 0],
+                [maxWidth - 1, 0],
+                [maxWidth - 1, maxHeight - 1],
+                [0, maxHeight - 1]], dtype="float32")
+
+            M = cv2.getPerspectiveTransform(rect, dst)
+            warp = cv2.warpPerspective(license_plate_crop, M, (maxWidth, maxHeight))
+
+            return warp
+
+        return license_plate_crop_clahe  # Return the CLAHE image if no contour is found
+
+
+def visualize(video_path):
+    video_name = os.path.splitext(os.path.basename(video_path))[0]
+
+    results = pd.read_csv(f'./sample/{video_name}_interpolated.csv')
+
+    # load video
+    cap = cv2.VideoCapture(video_path)
+
+    fourcc = cv2.VideoWriter_fourcc(*'mp4v')  # Specify the codec
+    fps = cap.get(cv2.CAP_PROP_FPS)
+    width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+    height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+    out = cv2.VideoWriter(f'./sample/{video_name}_out.mp4', fourcc, fps, (width, height))
+
+    license_plate = {}
+    for car_id in np.unique(results['car_id']):
+        max_ = np.amax(results[results['car_id'] == car_id]['license_number_score'])
+        license_plate[car_id] = {'license_crop': None,
+                                 'license_plate_number': results[(results['car_id'] == car_id) &
+                                                                 (results['license_number_score'] == max_)][
+                                     'license_number'].iloc[0]}
+        cap.set(cv2.CAP_PROP_POS_FRAMES, results[(results['car_id'] == car_id) &
+                                                 (results['license_number_score'] == max_)]['frame_nmr'].iloc[0])
+        ret, frame = cap.read()
+
+        x1, y1, x2, y2 = ast.literal_eval(results[(results['car_id'] == car_id) &
+                                                  (results['license_number_score'] == max_)]['license_plate_bbox'].iloc[
+                                              0].replace('[ ', '[').replace('   ', ' ').replace('  ', ' ').replace(' ',
+                                                                                                                   ','))
+
+        license_crop = frame[int(y1):int(y2), int(x1):int(x2), :]
+        license_crop = cv2.resize(license_crop, (int((x2 - x1) * 400 / (y2 - y1)), 400))
+
+        license_plate[car_id]['license_crop'] = license_crop
+
+    frame_nmr = -1
+
+    cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
+
+    # read frames
+    ret = True
+    while ret:
+        ret, frame = cap.read()
+        frame_nmr += 1
+        if ret:
+            df_ = results[results['frame_nmr'] == frame_nmr]
+            for row_indx in range(len(df_)):
+                # draw car
+                car_x1, car_y1, car_x2, car_y2 = ast.literal_eval(
+                    df_.iloc[row_indx]['car_bbox'].replace('[ ', '[').replace('   ', ' ').replace('  ', ' ').replace(
+                        ' ', ','))
+                draw_border(frame, (int(car_x1), int(car_y1)), (int(car_x2), int(car_y2)), (0, 255, 0), 25,
+                            line_length_x=200, line_length_y=200)
+
+                # draw license plate
+                x1, y1, x2, y2 = ast.literal_eval(
+                    df_.iloc[row_indx]['license_plate_bbox'].replace('[ ', '[').replace('   ', ' ').replace('  ',
+                                                                                                            ' ').replace(
+                        ' ', ','))
+                cv2.rectangle(frame, (int(x1), int(y1)), (int(x2), int(y2)), (0, 0, 255), 12)
+
+                # crop license plate
+                license_crop = license_plate[df_.iloc[row_indx]['car_id']]['license_crop']
+
+                H, W, _ = license_crop.shape
+
+                try:
+                    frame[int(car_y1) - H - 100:int(car_y1) - 100,
+                    int((car_x2 + car_x1 - W) / 2):int((car_x2 + car_x1 + W) / 2), :] = license_crop
+
+                    frame[int(car_y1) - H - 400:int(car_y1) - H - 100,
+                    int((car_x2 + car_x1 - W) / 2):int((car_x2 + car_x1 + W) / 2), :] = (255, 255, 255)
+
+                    (text_width, text_height), _ = cv2.getTextSize(
+                        license_plate[df_.iloc[row_indx]['car_id']]['license_plate_number'],
+                        cv2.FONT_HERSHEY_SIMPLEX,
+                        4.3,
+                        17)
+
+                    cv2.putText(frame,
+                                license_plate[df_.iloc[row_indx]['car_id']]['license_plate_number'],
+                                (int((car_x2 + car_x1 - text_width) / 2), int(car_y1 - H - 250 + (text_height / 2))),
+                                cv2.FONT_HERSHEY_SIMPLEX,
+                                4.3,
+                                (0, 0, 0),
+                                17)
+
+                except:
+                    pass
+
+            out.write(frame)
+            frame = cv2.resize(frame, (1280, 720))
+
+            # cv2.imshow('frame', frame)
+            # cv2.waitKey(0)
+
+    out.release()
+    cap.release()
