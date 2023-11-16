@@ -1,0 +1,8 @@
+data_dir: "/data/vlt_cls_data"
+model_save_dir: "./trained_models/vlt_cls_model"
+load_model: "../nia-81-134/trained_models/best-220127.pth"
+batch_size: 256
+lr: 0.001
+lr_step_size: 2
+lr_gamma: 0.5
+num_epochs: 10
