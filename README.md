@@ -8,7 +8,7 @@
 
 ## 2. 프로젝트 구성 및 담당자
 
-### Line Violation Detection by [진한별](https://github.com/Moonbyeol)
+### [Line Violation Detection](https://github.com/SeSAC-Men-in-Black/Men-in-Black/tree/074ad63391bab45290966de5b0f9d747f9a252ae/Line%20violation%20detection) by [진한별](https://github.com/Moonbyeol)
 <details>
 <summary>Details</summary>
 <br>
