@@ -65,10 +65,10 @@
 
 ![image](https://github.com/SeSAC-Men-in-Black/Men-in-Black/assets/99532836/8a34a5a8-51c2-4455-a723-1afdd4e986ca)
 
-## 사용 툴
+## 3. 사용 툴
 <img width="793" alt="image" src="https://github.com/SeSAC-Men-in-Black/Men-in-Black/assets/99532836/4508f00f-9b1b-4dca-941c-6966f17d5ec6">
 
-## 프로젝트 일정 
+## 4. 프로젝트 일정 
 ![men_in_black_2023-11-16_01 43pm](https://github.com/SeSAC-Men-in-Black/Men-in-Black/assets/99532836/f8f97160-0093-44aa-a3a4-2250958e438d)
 
 
