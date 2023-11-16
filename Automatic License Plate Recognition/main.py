@@ -18,7 +18,7 @@ coco_model = YOLO('yolov8m.pt')
 license_plate_detector = YOLO('models/11-10_best_weight_yolov8m_140_epochs.pt')
 
 # load video
-video_path = './sample/IMG_3365.mp4'
+video_path = './sample/road_sample_license_plate.mp4'
 video_name = os.path.splitext(os.path.basename(video_path))[0]
 cap = cv2.VideoCapture(video_path)
 

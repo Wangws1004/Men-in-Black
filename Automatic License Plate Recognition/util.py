@@ -8,9 +8,13 @@ import ast
 import re
 import pandas as pd
 import os
+from PIL import Image, ImageDraw, ImageFont
+from tqdm import tqdm
+
+
 
 # Initialize the OCR reader
-reader = easyocr.Reader(['ko'], gpu=False)
+reader = easyocr.Reader(['en'], gpu=False)
 
 # Mapping dictionaries for character conversion
 dict_char_to_int = {'O': '0',
@@ -283,7 +287,7 @@ def interpolate_bounding_boxes(data):
     return interpolated_data
 
 
-def draw_border(img, top_left, bottom_right, color=(0, 255, 0), thickness=10, line_length_x=200, line_length_y=200):
+def draw_border(img, top_left, bottom_right, color=(0, 255, 0), thickness=7, line_length_x=200, line_length_y=200):
     x1, y1 = top_left
     x2, y2 = bottom_right
 
@@ -378,6 +382,16 @@ def process_and_visualize_license_plate(license_plate_crop):
 def visualize(video_path):
     video_name = os.path.splitext(os.path.basename(video_path))[0]
 
+    # Path to the Korean font
+    korean_font_path = './fonts/NanumGothic-ExtraBold.ttf'
+    korean_font_size = 80
+
+    # Check if the font file exists
+    if not os.path.exists(korean_font_path):
+        raise FileNotFoundError(f"Korean font file not found at {korean_font_path}")
+
+    korean_font = ImageFont.truetype(korean_font_path, korean_font_size)
+
     results = pd.read_csv(f'./sample/{video_name}_interpolated.csv')
 
     # load video
@@ -406,7 +420,7 @@ def visualize(video_path):
                                                                                                                    ','))
 
         license_crop = frame[int(y1):int(y2), int(x1):int(x2), :]
-        license_crop = cv2.resize(license_crop, (int((x2 - x1) * 400 / (y2 - y1)), 400))
+        license_crop = cv2.resize(license_crop, (int((x2 - x1) * 200 / (y2 - y1)), 200))
 
         license_plate[car_id]['license_crop'] = license_crop
 
@@ -416,6 +430,8 @@ def visualize(video_path):
 
     # read frames
     ret = True
+
+
     while ret:
         ret, frame = cap.read()
         frame_nmr += 1
@@ -438,31 +454,46 @@ def visualize(video_path):
 
                 # crop license plate
                 license_crop = license_plate[df_.iloc[row_indx]['car_id']]['license_crop']
-
                 H, W, _ = license_crop.shape
 
+                # Check if there is enough space to place the image
+                available_space = int(car_y1) - 100  # Space above the car
+
+                # If not enough space, resize the image to half its size
+                if H > available_space:
+                    new_height = H // 2
+                    new_width = W // 2
+                    license_crop = cv2.resize(license_crop, (new_width, new_height))
+                    H, W, _ = license_crop.shape
+
+                # Adjust the position to reduce gap
+                placement_y = int(car_y1) - H  # Adjust the gap here
+
                 try:
-                    frame[int(car_y1) - H - 100:int(car_y1) - 100,
+                    frame[placement_y:placement_y + H,
                     int((car_x2 + car_x1 - W) / 2):int((car_x2 + car_x1 + W) / 2), :] = license_crop
 
-                    frame[int(car_y1) - H - 400:int(car_y1) - H - 100,
-                    int((car_x2 + car_x1 - W) / 2):int((car_x2 + car_x1 + W) / 2), :] = (255, 255, 255)
+                    # Prepare for drawing text with PIL
+                    pil_image = Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
+                    draw = ImageDraw.Draw(pil_image)
 
-                    (text_width, text_height), _ = cv2.getTextSize(
-                        license_plate[df_.iloc[row_indx]['car_id']]['license_plate_number'],
-                        cv2.FONT_HERSHEY_SIMPLEX,
-                        4.3,
-                        17)
+                    # Check if the text is in Korean
+                    license_text = license_plate[df_.iloc[row_indx]['car_id']]['license_plate_number']
+                    is_korean = any("\uac00" <= char <= "\ud7a3" for char in license_text)
 
-                    cv2.putText(frame,
-                                license_plate[df_.iloc[row_indx]['car_id']]['license_plate_number'],
-                                (int((car_x2 + car_x1 - text_width) / 2), int(car_y1 - H - 250 + (text_height / 2))),
-                                cv2.FONT_HERSHEY_SIMPLEX,
-                                4.3,
-                                (0, 0, 0),
-                                17)
+                    text_x = int((car_x2 + car_x1 - W) / 2)
+                    text_y = placement_y - korean_font_size - 10  # Adjust y position for text
 
-                except:
+                    if is_korean:
+                        draw.text((text_x, text_y), license_text, font=korean_font, fill=(0, 0, 0))
+                    else:
+                        draw.text((text_x, text_y), license_text, font=ImageFont.truetype("Arial.ttf", 40),
+                                  fill=(0, 0, 0))
+
+                    frame = cv2.cvtColor(np.array(pil_image), cv2.COLOR_RGB2BGR)
+
+                except Exception as e:
+                    print("Error:", e)
                     pass
 
             out.write(frame)
