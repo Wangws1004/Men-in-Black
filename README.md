@@ -199,7 +199,9 @@ Canny Edge Detection:
 - 80 object categories
 - Classes: Car, Motorcycle, Bus, Truck
 
-![image](https://github.com/SeSAC-Men-in-Black/Men-in-Black/assets/99532836/98088b3c-1fed-4e4b-bde9-7617afaed7e7)
+![](https://i.imgur.com/X6FioAe.png)
+
+
 
 
 #### [\[Roboflow\]License Plate Recognition Object Detection Dataset (v4, resized640_aug3x-ACCURATE)](https://universe.roboflow.com/roboflow-universe-projects/license-plate-recognition-rxg4e/dataset/4)
@@ -217,7 +219,7 @@ Canny Edge Detection:
   - Blur: Up to 0.5px 
   - Cutout: 5 boxes with 2% size each
  
-![image](https://github.com/SeSAC-Men-in-Black/Men-in-Black/assets/99532836/af6e9b8e-045d-4c03-855b-bcdedfae3cdf)
+![](https://i.imgur.com/CqP6mNG.png)
 
 
  #### [\[AIHUB\]차로 위반 영상 데이터](https://aihub.or.kr/aihubdata/data/view.do?currMenu=115&topMenu=100&aihubDataSe=data&dataSetSn=628)
@@ -231,12 +233,13 @@ Canny Edge Detection:
    - FHD 해상도
    - 비식별화 처리(사람얼굴, 자동차 번호판, 개인 전화번호 등)
 
-![image](https://github.com/SeSAC-Men-in-Black/Men-in-Black/assets/99532836/8a34a5a8-51c2-4455-a723-1afdd4e986ca)
+![](https://i.imgur.com/8PRmusV.png)
 
 ## 4. 사용 툴
-<img width="793" alt="image" src="https://github.com/SeSAC-Men-in-Black/Men-in-Black/assets/99532836/4508f00f-9b1b-4dca-941c-6966f17d5ec6">
 
+![](https://i.imgur.com/I0kSdG1.png)
 ## 5. 프로젝트 일정 
-![men_in_black_2023-11-16_01 43pm](https://github.com/SeSAC-Men-in-Black/Men-in-Black/assets/99532836/f8f97160-0093-44aa-a3a4-2250958e438d)
+
+![](https://i.imgur.com/35Cr1cR.png)
 
 
