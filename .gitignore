@@ -199,4 +199,6 @@ __pycache__
 *.ckpt
 *.tar
 *.zip
+*/sample/*
+*.jpeg
 
