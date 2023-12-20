@@ -20,7 +20,7 @@
 <br>
 </details>
 
-### [License Plate Recognition](https://github.com/SeSAC-Men-in-Black/Men-in-Black/tree/main/Automatic%20License%20Plate%20Recognition) by [신승엽](https://github.comsyshin0116)
+### [License Plate Recognition](https://github.com/SeSAC-Men-in-Black/Men-in-Black/tree/main/Automatic%20License%20Plate%20Recognition) by [신승엽](https://github.com/syshin0116)
 <details>
 <summary>Details</summary>
 
