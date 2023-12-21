@@ -8,11 +8,11 @@
 - 단안 카메라 (Monocular Camera)로 차량 간 거리 및 상대 속도를 추정
 - U-net, DORN, M3D-RPN 으로 3D 객체 검출 방법을 통해 차량 간 거리 추정
 - Flownet2, PWC-NET 으로 이미지의 흐름을 3D 모션 필드로 나타내 상대속도를 추정
-		- U-net은 인코더(축소 경로)와 디코더(확장 경로)로 이루어진 U자형 구조를 가지고 있음. 인코더는 입력 이미지를 반복적으로 다운샘플링하여 고수준의 특징을 추출하고, 디코더는 이러한 특징을 업샘플링하여 원래 입력 이미지의 크기로 복원
-  		- DORN(Depth Ordering Network)은 단일 이미지로부터 깊이를 예측하는 딥러닝 기반의 모델
-  		- M3D-RPN(Monocular 3D Region Proposal Network)은 단일 이미지에서 객체의 3D bounding box를 예측하는 데 사용되는 딥러닝 기반의 모델
-		- FlowNet 2.0은 컴퓨터 비전 분야에서 Flow를 예측하는 딥러닝 네트워크. 이 모델은 입력 이미지 간의 flow를 정확하게 추정하여 영상에서의 물체의 움직임이나 카메라의 움직임을 파악하는 데 사용
-		- PWC-Net(Pyramidal Warping of Convolutional Features)은 영상 간 광학 흐름(Optical Flow)을 예측하기 위한 딥러닝 기반의 모델
+	- U-net은 인코더(축소 경로)와 디코더(확장 경로)로 이루어진 U자형 구조를 가지고 있음. 인코더는 입력 이미지를 반복적으로 다운샘플링하여 고수준의 특징을 추출하고, 디코더는 이러한 특징을 업샘플링하여 원래 입력 이미지의 크기로 복원
+  	- DORN(Depth Ordering Network)은 단일 이미지로부터 깊이를 예측하는 딥러닝 기반의 모델
+  	- M3D-RPN(Monocular 3D Region Proposal Network)은 단일 이미지에서 객체의 3D bounding box를 예측하는 데 사용되는 딥러닝 기반의 모델
+	- FlowNet 2.0은 컴퓨터 비전 분야에서 Flow를 예측하는 딥러닝 네트워크. 이 모델은 입력 이미지 간의 flow를 정확하게 추정하여 영상에서의 물체의 움직임이나 카메라의 움직임을 파악하는 데 사용
+	- PWC-Net(Pyramidal Warping of Convolutional Features)은 영상 간 광학 흐름(Optical Flow)을 예측하기 위한 딥러닝 기반의 모델
 
 ## 목표와 도전 과제
 
