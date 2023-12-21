@@ -65,7 +65,7 @@ __3. 학습과정__
   - Monodepth2는 단안(monocular)데이터와 스테레오(stereo)데이터를 모두 사용할 수 있음.
   - 단안 데이터만을 사용하는 경우와 스테레오 데이터를 함께 사용하는 경우(mono+stereo)를 구분하여 실험함.
 
-## 평가지표
+## 평가지표 및 결과
 모델 성능 평가를 위해 다음과 같은 표준적인 깊이 추정 평가 지표가 사용됨.
 1. 절대 상대 오차(Absolute Relative Error, Abs Rel)  
   예측된 깊이와 실제 깊이 사이의 상대적 차이를 평균하여 측정함.
@@ -81,6 +81,17 @@ __3. 학습과정__
 ![Quantitative results](https://github.com/SeSAC-Men-in-Black/Men-in-Black/assets/83795101/7c1c4f7e-9168-45d3-8866-2717325b2071)
 본 방법론은 monocular 방식으로 설계가 되었지만, Stereo 성능에서도 높은 결과를 달성한 것이 흥미로움.  
 위의 결과는 post-processing 을 진행하지 않았을때의 결과임.  
-본 결과에 post-processing까지 적용한다면 아래 표처럼 성능이 소폭 상승하게 됨.  
-![Effect of post-processing result](https://github.com/SeSAC-Men-in-Black/Men-in-Black/assets/83795101/7a14f48b-3265-42e8-89c2-59682764e563)
+본 결과에 post-processing까지 적용한다면 아래 표처럼 성능이 조금 상승하게 됨.  
+![Effect of post-processing result](https://github.com/SeSAC-Men-in-Black/Men-in-Black/assets/83795101/7a14f48b-3265-42e8-89c2-59682764e563)  
 
+그리고 본 논문에서 Ablation study 결과는 아래와 같음.  
+![Ablation study](https://github.com/SeSAC-Men-in-Black/Men-in-Black/assets/83795101/1681fea1-20eb-4aec-8657-6d64ba502c21)  
+제안한 방법론을 하나씩 적용하고 적용하지 않았을 때 엄청난 성능차이가 있는거 같아 보이진 않음  
+
+다른 모델들과 비교했을때 Monodepth2가 Ground Truth와 가장 depth값이 유사한 것으로 보임
+![monodepth_Result](https://github.com/SeSAC-Men-in-Black/Men-in-Black/assets/83795101/28aafc37-0733-4b4d-8837-beaa5ae9b7ab)
+
+## 결론
+1. Monodepth2는 기존의 self-supervision 기반의 단안 깊이 추정(monocular depth estimation) 방법보다 더 좋은 성능을 보임
+2. 그러나 복잡한 장면이나 빛의 반사가 심한 영역이나, 비램버트 표면(Lambertian surface_등에 대한 깊이 추정의 정확도가 낮을 수 있음
+  ![화면 캡처 2023-12-21 143809](https://github.com/SeSAC-Men-in-Black/Men-in-Black/assets/83795101/13b2e53b-a5b9-408a-acee-603c5c5bd5fa)
