@@ -4,6 +4,12 @@
 - paper: [https://arxiv.org/pdf/2006.04082v2.pdf](https://arxiv.org/pdf/2006.04082v2.pdf)
 - github: [https://github.com/ZhenboSong/mono_velocity](https://github.com/ZhenboSong/mono_velocity
 
+## 요약
+- 단안 카메라 (Monocular Camera)로 차량 간 거리 및 상대 속도를 추정
+- U-net, DORN, M3D-RPN 으로 3D 객체 검출 방법을 통해 차량 간 거리 추정
+- Flownet2, PWC-NET 으로 이미지의 흐름을 3D 모션 필드로 나타내 상대속도를 추정
+
+
 ## 목표와 도전 과제
 
 - End-to-end 학습을 기반으로 1개의 단안 카메라 기반 차량 간 거리 및 상대 속도 추정
@@ -26,7 +32,7 @@
 - DORN 은 깊이를 순서형 회귀 문제로 간주
 - M3D-RPN 은 3D 바운딩 박스가 2D 이미지 공간에서 생성된 Convolution 특징을 활용할 수 있는 3D 영역을 제안
 - 상대속도는 이미지의 흐름을 3D 모션 필드로 나타냄
-	- Flownet2, PWC-Net을 통해 여러 신경망을 stack, warping
+	- Flownet2, PWC-Net을 통해 여러 신경망을 stacking, warping
 	- 이를 통해, 여러 신경망을 통합하여 가볍고 빠른 신경망 구현
 
 ![Screenshot 2023-12-20 at 2 57 16 PM](https://github.com/SeSAC-Men-in-Black/Men-in-Black/assets/140369529/33dce05b-d1f6-4bf7-b442-88e025baf8d0)
