@@ -93,5 +93,5 @@ __3. 학습과정__
 
 ## 결론
 1. Monodepth2는 기존의 self-supervision 기반의 단안 깊이 추정(monocular depth estimation) 방법보다 더 좋은 성능을 보임
-2. 그러나 복잡한 장면이나 빛의 반사가 심한 영역이나, 비램버트 표면(Lambertian surface_등에 대한 깊이 추정의 정확도가 낮을 수 있음
+2. 그러나 복잡한 장면이나 빛의 반사가 심한 영역이나, 비램버트 표면(Lambertian surface, 모든 방향에서 보아도 똑같은 밝기로 보이는 표면)등에 대한 깊이 추정의 정확도가 낮을 수 있음
   ![화면 캡처 2023-12-21 143809](https://github.com/SeSAC-Men-in-Black/Men-in-Black/assets/83795101/13b2e53b-a5b9-408a-acee-603c5c5bd5fa)
