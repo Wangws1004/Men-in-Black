@@ -1,4 +1,4 @@
-# **VDE: Vehicle Distance Estimation from a Monocular Camera for Advanced Driver Assistance Systems**
+![image](https://github.com/SeSAC-Men-in-Black/Men-in-Black/assets/140053617/db7c842e-0a8a-42b4-90ad-88c1782c7658)# **VDE: Vehicle Distance Estimation from a Monocular Camera for Advanced Driver Assistance Systems**
 ![ezgif com-gif-maker](https://user-images.githubusercontent.com/98331298/171547569-da221132-a13e-4b5f-8437-59cad290d3b2.gif)  
 - paper:https://www.mdpi.com/2073-8994/14/12/2657
 - github: https://github.com/KyujinHan/Object-Depth-detection-based-hybrid-Distance-estimator
@@ -34,8 +34,8 @@
 
 ### 1. DETR
 
-![[Pasted image 20231221182831.png]]
-![[Pasted image 20231221183026.png]]
+![image](https://github.com/SeSAC-Men-in-Black/Men-in-Black/assets/140053617/4cdda6c3-8324-4283-a32d-4a0f806416dc)
+![image](https://github.com/SeSAC-Men-in-Black/Men-in-Black/assets/140053617/75588172-3c01-44e7-a68c-c93db00b08d1)
 
 - Image input
 - CNN (Convolutional Neural Network) 사용하여 입력 이미지로부터 중요한 특징을 추출
@@ -46,7 +46,7 @@
 
 ### 2. GLPDepth structure
 
-![[Pasted image 20231221193303.png]]
+![image](https://github.com/SeSAC-Men-in-Black/Men-in-Black/assets/140053617/3c77aa23-5501-42e3-84a8-58de5850d120)
 
 - Input image
 - Global path
@@ -59,7 +59,7 @@
 
 ### 3. LSTM, RandomForest, XGBoost
 
-![[Pasted image 20231221193654.png]]
+![image](https://github.com/SeSAC-Men-in-Black/Men-in-Black/assets/140053617/23399896-7e2e-42dd-8903-ba92d113e5e7)
 - LSTM과 뒤에 FFN을 붙여서 Real distance를 예측
 
 ## 데이터셋 전처리
@@ -72,12 +72,12 @@
 
 ## 평가지표 및 결과
 
-![[Pasted image 20231221194336.png]]
+![image](https://github.com/SeSAC-Men-in-Black/Men-in-Black/assets/140053617/3aa7ccb7-3053-42c4-a443-76105017f6a0)
 - 전체적인 성능은 LSTM이 뛰어났고, Car의 distance estimation 성능은 XGBoost가 우월했다.
-![[Pasted image 20231221194417.png]]
+![image](https://github.com/SeSAC-Men-in-Black/Men-in-Black/assets/140053617/bfe4562f-10b3-4d8b-96c2-dde42ba0d7e8)
 
-![[Pasted image 20231221194441.png]]
-![[Pasted image 20231221194446.png]]
+![image](https://github.com/SeSAC-Men-in-Black/Men-in-Black/assets/140053617/4f25fe4e-00a4-494a-9bf8-9ca00ee13f2f)
+![image](https://github.com/SeSAC-Men-in-Black/Men-in-Black/assets/140053617/822d02e0-ea4d-4751-9d81-e5c135d062f3)
 
 
 ## 실패 원인
