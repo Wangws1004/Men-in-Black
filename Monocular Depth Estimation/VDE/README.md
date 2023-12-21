@@ -1,4 +1,4 @@
-![image](https://github.com/SeSAC-Men-in-Black/Men-in-Black/assets/140053617/db7c842e-0a8a-42b4-90ad-88c1782c7658)# **VDE: Vehicle Distance Estimation from a Monocular Camera for Advanced Driver Assistance Systems**
+# **VDE: Vehicle Distance Estimation from a Monocular Camera for Advanced Driver Assistance Systems**
 ![ezgif com-gif-maker](https://user-images.githubusercontent.com/98331298/171547569-da221132-a13e-4b5f-8437-59cad290d3b2.gif)  
 - paper:https://www.mdpi.com/2073-8994/14/12/2657
 - github: https://github.com/KyujinHan/Object-Depth-detection-based-hybrid-Distance-estimator
