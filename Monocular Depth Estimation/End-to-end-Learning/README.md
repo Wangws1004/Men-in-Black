@@ -4,6 +4,18 @@
 - paper: [https://arxiv.org/pdf/2006.04082v2.pdf](https://arxiv.org/pdf/2006.04082v2.pdf)
 - github: [https://github.com/ZhenboSong/mono_velocity](https://github.com/ZhenboSong/mono_velocity
 
+## 요약
+- 단안 카메라 (Monocular Camera)로 차량 간 거리 및 상대 속도를 추정
+- U-net, DORN, M3D-RPN 으로 3D 객체 검출 방법을 통해 차량 간 거리 추정
+- Flownet2, PWC-NET 으로 이미지의 흐름을 3D 모션 필드로 나타내 상대속도를 추정
+
+  
+	- U-net은 인코더(축소 경로)와 디코더(확장 경로)로 이루어진 U자형 구조를 가지고 있음. 인코더는 입력 이미지를 반복적으로 다운샘플링하여 고수준의 특징을 추출하고, 디코더는 이러한 특징을 업샘플링하여 원래 입력 이미지의 크기로 복원
+  	- DORN(Depth Ordering Network)은 단일 이미지로부터 깊이를 예측하는 딥러닝 기반의 모델
+  	- M3D-RPN(Monocular 3D Region Proposal Network)은 단일 이미지에서 객체의 3D bounding box를 예측하는 데 사용되는 딥러닝 기반의 모델
+	- FlowNet 2.0은 컴퓨터 비전 분야에서 Flow를 예측하는 딥러닝 네트워크. 이 모델은 입력 이미지 간의 flow를 정확하게 추정하여 영상에서의 물체의 움직임이나 카메라의 움직임을 파악하는 데 사용
+	- PWC-Net(Pyramidal Warping of Convolutional Features)은 영상 간 광학 흐름(Optical Flow)을 예측하기 위한 딥러닝 기반의 모델
+
 ## 목표와 도전 과제
 
 - End-to-end 학습을 기반으로 1개의 단안 카메라 기반 차량 간 거리 및 상대 속도 추정
@@ -26,7 +38,7 @@
 - DORN 은 깊이를 순서형 회귀 문제로 간주
 - M3D-RPN 은 3D 바운딩 박스가 2D 이미지 공간에서 생성된 Convolution 특징을 활용할 수 있는 3D 영역을 제안
 - 상대속도는 이미지의 흐름을 3D 모션 필드로 나타냄
-	- Flownet2, PWC-Net을 통해 여러 신경망을 stack, warping
+	- Flownet2, PWC-Net을 통해 여러 신경망을 stacking, warping
 	- 이를 통해, 여러 신경망을 통합하여 가볍고 빠른 신경망 구현
 
 ![Screenshot 2023-12-20 at 2 57 16 PM](https://github.com/SeSAC-Men-in-Black/Men-in-Black/assets/140369529/33dce05b-d1f6-4bf7-b442-88e025baf8d0)

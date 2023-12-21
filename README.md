@@ -14,7 +14,7 @@
 <br>
 </details>
 
-### [Traffic Light Recognition](https://github.com/Wangws1004/Men-in-Black/tree/main/Traffic-Light-Recognition) by [최우석](https://github.com/Wangws1004)
+### [Traffic Light Recognition](https://github.com/SeSAC-Men-in-Black/Men-in-Black/tree/main/Traffic-Light-Recognition) by [최우석](https://github.com/Wangws1004)
 <details>
 <summary>Details</summary>
 <br>
@@ -241,5 +241,8 @@ Canny Edge Detection:
 ## 5. 프로젝트 일정 
 
 ![](https://i.imgur.com/35Cr1cR.png)
+
+![image](https://github.com/SeSAC-Men-in-Black/Men-in-Black/assets/140369529/0c31325c-acec-4954-a768-e079714aa469)
+
 
 
