@@ -3,12 +3,14 @@
 - paper:https://www.mdpi.com/2073-8994/14/12/2657
 - github: https://github.com/KyujinHan/Object-Depth-detection-based-hybrid-Distance-estimator
 
+
 ## 목표
 
 - 단안 카메라를 사용하여 정확하고 효율적인 차량 거리 추정을 위한 프레임워크를 개발
 - 거리 추정을 위한 프레임워크 제안 
 - 객체 탐지 및 깊이 추정
 - 거리 예측 모델 훈련
+
 
 ## 방법론
 
@@ -17,9 +19,10 @@
 - 거리 예측기 (XGBoost, RF, LSTM) : 객체 유형, 경계 상자의 세부 정보 및 추출된 깊이 특징을 바탕으로 객체와 카메라 사이의 실제 거리를 예측합니다.
 - 객체의 배경 픽셀을 제외한 20% 잘라낸 평균 깊이를 사용하여 거리를 더 정확하게 예측합니다.
 
+
 ## 모델 아키텍쳐
 
-![[Pasted image 20231221193538.png]]
+![image](https://github.com/SeSAC-Men-in-Black/Men-in-Black/assets/140053617/c5102726-34dd-4b41-90d7-8a6071c7fec4)
 
 - Image input
 - **DETR**과 **GLPDepth**에 각각 input
