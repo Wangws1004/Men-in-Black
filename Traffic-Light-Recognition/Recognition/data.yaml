@@ -1,0 +1,15 @@
+names:
+- Green Light
+- Left turn
+- Red Light
+- Yellow Light
+nc: 4
+roboflow:
+  license: CC BY 4.0
+  project: traffic-light-ke5b5
+  url: https://universe.roboflow.com/trafficlightdetect/traffic-light-ke5b5/dataset/10
+  version: 10
+  workspace: trafficlightdetect
+test: /content/Traffic_light/test/images
+train: /content/Traffic_light/train/images
+val: /content/Traffic_light/valid/images
