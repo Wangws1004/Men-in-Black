@@ -14,7 +14,7 @@
 <br>
 </details>
 
-### [Traffic Light Detection](https://github.com/SeSAC-Men-in-Black/Men-in-Black/tree/main/Traffic%20Light) by [최우석](https://github.com/Wangws1004)
+### [Traffic Light Recognition](https://github.com/SeSAC-Men-in-Black/Men-in-Black/tree/main/Traffic-Light-Recognition) by [최우석](https://github.com/Wangws1004)
 <details>
 <summary>Details</summary>
 <br>
